@@ -1,6 +1,6 @@
 // Service worker : permet à l'appli de fonctionner hors ligne.
 // Incrémente CACHE à chaque mise à jour des fichiers pour forcer le rafraîchissement.
-const CACHE = 'carnet-ping-v1';
+const CACHE = 'carnet-ping-v2';
 const FILES = [
   './',
   'index.html',

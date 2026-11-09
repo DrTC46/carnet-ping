@@ -23,6 +23,10 @@
 <main>
   <!-- LISTE -->
   <section id="view-list" class="view">
+    <div id="installBanner" class="card install-banner" hidden>
+      <span>📲 Installe Carnet Ping comme une vraie appli</span>
+      <button type="button" class="btn primary install-btn">Installer</button>
+    </div>
     <div id="summary" class="summary"></div>
     <input id="search" type="search" placeholder="Rechercher un adversaire, un club, un commentaire…">
     <div id="matchList"></div>
@@ -165,6 +169,8 @@
     <div class="card">
       <h3>ℹ️ À propos</h3>
       <p class="muted" id="aboutInfo">Carnet Ping – fonctionne hors ligne.</p>
+      <button type="button" class="btn primary install-btn" hidden>📲 Installer l'appli</button>
+      <p class="muted" id="installDiag" style="font-size:.8rem"></p>
     </div>
   </section>
 </main>

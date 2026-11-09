@@ -3,6 +3,7 @@
   "short_name": "Carnet Ping",
   "description": "Suivi et analyse de mes matchs de tennis de table",
   "lang": "fr",
+  "id": "./",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

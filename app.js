@@ -1,7 +1,7 @@
 'use strict';
 
 /* ================== Configuration ================== */
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 const STORAGE_KEY = 'carnetPing.matches.v1';
 const SETTINGS_KEY = 'carnetPing.settings.v1';
 const MAX_SETS = 5;
@@ -586,6 +586,45 @@ if (matches.length >= 5) {
   if (since >= 10) setTimeout(() => toast(`💾 ${since} matchs non sauvegardés – pense à exporter (onglet IA & données)`), 800);
 }
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+/* ================== Installation ================== */
+let installPrompt = null;
+let swStatus = 'non supporté';
+const isStandalone = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+function renderInstallUi() {
+  const canInstall = !!installPrompt && !isStandalone();
+  $('#installBanner').hidden = !canInstall;
+  $$('button.install-btn').forEach(b => { if (!b.closest('#installBanner')) b.hidden = !canInstall; });
+  $('#installDiag').textContent =
+    `Diagnostic – mode appli : ${isStandalone() ? 'oui ✓' : 'non (navigateur)'} · ` +
+    `service worker : ${swStatus} · installation proposée par le navigateur : ${installPrompt ? 'oui' : 'non'}`;
 }
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  installPrompt = e;
+  renderInstallUi();
+});
+
+window.addEventListener('appinstalled', () => {
+  installPrompt = null;
+  renderInstallUi();
+  toast('Appli installée ✓ – ouvre-la depuis l\'écran d\'accueil');
+});
+
+document.addEventListener('click', async (e) => {
+  if (!e.target.closest('button.install-btn') || !installPrompt) return;
+  installPrompt.prompt();
+  await installPrompt.userChoice.catch(() => {});
+  installPrompt = null;
+  renderInstallUi();
+});
+
+if ('serviceWorker' in navigator) {
+  swStatus = 'en cours…';
+  navigator.serviceWorker.register('sw.js')
+    .then(() => navigator.serviceWorker.ready)
+    .then(() => { swStatus = 'actif ✓'; renderInstallUi(); })
+    .catch((err) => { swStatus = 'erreur : ' + err.message; renderInstallUi(); });
+}
+renderInstallUi();
