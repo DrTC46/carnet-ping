@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carnet Ping</title>
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Carnet Ping">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <h1>🏓 Carnet Ping</h1>
+  <span id="headerInfo" class="muted"></span>
+</header>
+
+<main>
+  <!-- LISTE -->
+  <section id="view-list" class="view">
+    <div id="summary" class="summary"></div>
+    <input id="search" type="search" placeholder="Rechercher un adversaire, un club, un commentaire…">
+    <div id="matchList"></div>
+  </section>
+
+  <!-- FORMULAIRE -->
+  <section id="view-form" class="view" hidden>
+    <form id="matchForm" autocomplete="off">
+      <h2 id="formTitle">Nouveau match</h2>
+
+      <fieldset>
+        <legend>Match</legend>
+        <div class="row">
+          <label>Date<input type="date" name="date" required></label>
+          <label>Mes points<input type="number" name="myPoints" inputmode="numeric" placeholder="ex. 1180"></label>
+        </div>
+        <label>Contexte
+          <select name="context" required>
+            <option>Championnat par équipes</option>
+            <option>Critérium fédéral</option>
+            <option>Tournoi</option>
+            <option>Match amical</option>
+            <option>Entraînement</option>
+            <option>Autre</option>
+          </select>
+        </label>
+        <label>Précision (division, tableau, tour…)<input name="competitionDetail" placeholder="ex. R3 – J5, tableau 1300, 1/4 de finale"></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Adversaire</legend>
+        <label>Nom<input name="oppName" list="oppNames" required placeholder="Nom de l'adversaire"></label>
+        <datalist id="oppNames"></datalist>
+        <div class="row">
+          <label>Ses points (au moment du match)<input type="number" name="oppPoints" inputmode="numeric" placeholder="ex. 1150"></label>
+          <label>Club<input name="oppClub" placeholder="facultatif"></label>
+        </div>
+        <div class="label">Main</div>
+        <div class="seg" data-name="oppHand">
+          <button type="button" data-v="Droitier">Droitier</button>
+          <button type="button" data-v="Gaucher">Gaucher</button>
+        </div>
+        <label>Style de jeu
+          <select name="oppStyle">
+            <option value="">—</option>
+            <option>Attaquant CD</option>
+            <option>Attaquant 2 côtés</option>
+            <option>Bloqueur / contreur</option>
+            <option>Défenseur</option>
+            <option>Pousseur / régulier</option>
+            <option>Polyvalent</option>
+            <option>Autre</option>
+          </select>
+        </label>
+        <label>Matériel particulier
+          <select name="oppMaterial">
+            <option value="">Classique (backside 2 côtés)</option>
+            <option>Picots courts</option>
+            <option>Picots longs</option>
+            <option>Anti-top</option>
+            <option>Autre</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Score</legend>
+        <p class="hint">Saisis les points de chaque set (moi – adversaire). Le résultat est calculé automatiquement.</p>
+        <div id="setsBox"></div>
+        <div id="scorePreview" class="score-preview"></div>
+        <details>
+          <summary>Pas le détail des sets ? Score direct</summary>
+          <div class="row">
+            <label>Sets gagnés<input type="number" name="manualWon" min="0" max="5" inputmode="numeric"></label>
+            <label>Sets perdus<input type="number" name="manualLost" min="0" max="5" inputmode="numeric"></label>
+          </div>
+        </details>
+      </fieldset>
+
+      <fieldset>
+        <legend>Analyse</legend>
+        <div class="label">✅ Ce qui a marché</div>
+        <div class="chips" data-name="strengths"></div>
+        <div class="label">❌ Ce qui n'a pas marché</div>
+        <div class="chips" data-name="weaknesses"></div>
+        <label>Pourquoi j'ai gagné / perdu ?<textarea name="whyResult" rows="3"></textarea></label>
+        <label>Qu'aurais-je pu faire différemment ?<textarea name="doDifferently" rows="3"></textarea></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Ressenti (1 = mauvais, 5 = excellent)</legend>
+        <div id="ratingsBox"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Compléments</legend>
+        <label>Feeling / commentaire libre<textarea name="comment" rows="3" placeholder="Stress au début, bon en revers, du mal à prendre l'initiative en CD…"></textarea></label>
+        <label>Conditions (salle, balles, fatigue, horaire…)<input name="conditions"></label>
+        <div class="label">Match</div>
+        <div class="seg" data-name="tightness">
+          <button type="button" data-v="Serré">Serré</button>
+          <button type="button" data-v="Déséquilibré">Déséquilibré</button>
+        </div>
+      </fieldset>
+
+      <div class="form-actions">
+        <button type="button" id="cancelBtn" class="btn ghost">Annuler</button>
+        <button type="submit" class="btn primary">Enregistrer</button>
+      </div>
+      <button type="button" id="deleteBtn" class="btn danger" hidden>Supprimer ce match</button>
+    </form>
+  </section>
+
+  <!-- STATS -->
+  <section id="view-stats" class="view" hidden>
+    <div id="stats"></div>
+  </section>
+
+  <!-- DONNÉES / IA -->
+  <section id="view-data" class="view" hidden>
+    <div class="card">
+      <h3>🤖 Analyse par l'IA</h3>
+      <p>Copie tous tes matchs avec une consigne d'analyse, puis colle le tout dans Claude (ou une autre IA).</p>
+      <label>Question particulière (facultatif)
+        <textarea id="aiQuestion" rows="2" placeholder="ex. Pourquoi je perds contre des joueurs moins bien classés ?"></textarea>
+      </label>
+      <button id="aiCopyBtn" class="btn primary">Copier pour l'IA</button>
+      <button id="aiShareBtn" class="btn ghost">Partager…</button>
+    </div>
+    <div class="card">
+      <h3>💾 Sauvegarde</h3>
+      <p>Les données sont stockées <b>uniquement sur ce téléphone</b>. Exporte régulièrement une sauvegarde (Drive, iCloud, mail…).</p>
+      <button id="exportJsonBtn" class="btn primary">Exporter (JSON)</button>
+      <button id="exportCsvBtn" class="btn ghost">Exporter (CSV / Excel)</button>
+      <label class="btn ghost file-btn">Importer une sauvegarde
+        <input type="file" id="importInput" accept=".json,application/json" hidden>
+      </label>
+      <p id="dataInfo" class="muted"></p>
+    </div>
+    <div class="card">
+      <h3>ℹ️ À propos</h3>
+      <p class="muted" id="aboutInfo">Carnet Ping – fonctionne hors ligne.</p>
+    </div>
+  </section>
+</main>
+
+<nav class="tabbar">
+  <button data-view="list" class="active"><span>📋</span>Matchs</button>
+  <button data-view="form" id="addTab"><span>➕</span>Ajouter</button>
+  <button data-view="stats"><span>📊</span>Stats</button>
+  <button data-view="data"><span>🤖</span>IA & données</button>
+</nav>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>
